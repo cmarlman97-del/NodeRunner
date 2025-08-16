@@ -1,5 +1,8 @@
+import * as React from "react";
 import type { Contact } from "@shared/schema";
 import { Edit, Trash2 } from "lucide-react";
+import { Link } from "wouter";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ContactCardProps {
   contact: Contact;
@@ -7,23 +10,33 @@ interface ContactCardProps {
 }
 
 export default function ContactCard({ contact, onDelete }: ContactCardProps) {
+  const qc = useQueryClient();
+
+  const prefetch = React.useCallback(() => {
+    qc.prefetchQuery({
+      queryKey: ["contact", contact.id],
+      queryFn: () => fetch(`/api/contacts/${contact.id}`).then((r) => r.json()),
+      staleTime: 10_000,
+    });
+  }, [qc, contact.id]);
+
   const getInitials = (name: string) => {
     return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
+      .split(" ")
+      .map((word) => word[0])
+      .join("")
       .toUpperCase()
       .slice(0, 2);
   };
 
   const getAvatarColor = (name: string) => {
     const colors = [
-      'bg-gradient-to-br from-primary-500 to-primary-600',
-      'bg-gradient-to-br from-green-500 to-green-600',
-      'bg-gradient-to-br from-purple-500 to-purple-600',
-      'bg-gradient-to-br from-blue-500 to-blue-600',
-      'bg-gradient-to-br from-pink-500 to-pink-600',
-      'bg-gradient-to-br from-indigo-500 to-indigo-600',
+      "bg-gradient-to-br from-primary-500 to-primary-600",
+      "bg-gradient-to-br from-green-500 to-green-600",
+      "bg-gradient-to-br from-purple-500 to-purple-600",
+      "bg-gradient-to-br from-blue-500 to-blue-600",
+      "bg-gradient-to-br from-pink-500 to-pink-600",
+      "bg-gradient-to-br from-indigo-500 to-indigo-600",
     ];
     const index = name.charCodeAt(0) % colors.length;
     return colors[index];
@@ -33,18 +46,32 @@ export default function ContactCard({ contact, onDelete }: ContactCardProps) {
     <div className="bg-white rounded-xl shadow-material p-6 hover:shadow-material-lg transition-shadow border border-gray-100">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <div className={`w-12 h-12 ${getAvatarColor(contact.name)} rounded-full flex items-center justify-center text-white font-semibold text-lg`}>
+          <div
+            className={`w-12 h-12 ${getAvatarColor(
+              contact.name
+            )} rounded-full flex items-center justify-center text-white font-semibold text-lg`}
+          >
             <span data-testid={`text-initials-${contact.id}`}>
               {getInitials(contact.name)}
             </span>
           </div>
+
           <div>
-            <h3 className="text-lg font-semibold text-gray-900" data-testid={`text-name-${contact.id}`}>
-              {contact.name}
-            </h3>
+            {/* Name → link to /contacts/:id with prefetch on hover */}
+            <Link href={`/contacts/${contact.id}`} onMouseEnter={prefetch}>
+              <h3
+                className="text-lg font-semibold text-blue-600 hover:underline"
+                data-testid={`text-name-${contact.id}`}
+                title={`Open ${contact.name}`}
+              >
+                {contact.name}
+              </h3>
+            </Link>
+
             <p className="text-gray-600" data-testid={`text-email-${contact.id}`}>
               {contact.email}
             </p>
+
             <div className="flex items-center space-x-4 mt-1 text-sm text-gray-500">
               {contact.phone && (
                 <span data-testid={`text-phone-${contact.id}`}>
@@ -59,6 +86,7 @@ export default function ContactCard({ contact, onDelete }: ContactCardProps) {
             </div>
           </div>
         </div>
+
         <div className="flex items-center space-x-2">
           <button
             className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
