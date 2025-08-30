@@ -289,9 +289,9 @@ export default function Dashboard() {
                       <button
                         className="px-3 py-1 rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50"
                         onClick={() => saveEdit(c.id)}
-                        disabled={updateMutation.isLoading}
+                        disabled={updateMutation.isPending}
                       >
-                        {updateMutation.isLoading ? "Saving…" : "Save"}
+                        {updateMutation.isPending ? "Saving…" : "Save"}
                       </button>
                       <button
                         className="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200"

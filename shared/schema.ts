@@ -83,7 +83,7 @@ export type ContactTypeItem = {
   id: string;
   label: string;
   isActive: boolean;
-  sortOrder?: number;
+  sortOrder: number;
 };
 
 /**

@@ -36,12 +36,12 @@ export default function ContactDetailPage({ params }: { params: { id: string } }
           <p className="text-sm text-slate-500">{contact.contactType ?? "—"}</p>
         </div>
         <dl className="text-sm grid gap-3">
-          <Info label="Company" value={contact.company} />
-          <Info label="Email" value={contact.email} />
-          <Info label="Phone" value={contact.phone} />
-          <Info label="City" value={contact.city} />
-          <Info label="State" value={contact.state} />
-          <Info label="Website" value={contact.website} isLink />
+          <Info label="Company" value={contact.company ?? null} />
+          <Info label="Email" value={contact.email ?? null} />
+          <Info label="Phone" value={contact.phone ?? null} />
+          <Info label="City" value={contact.city ?? null} />
+          <Info label="State" value={contact.state ?? null} />
+          <Info label="Website" value={contact.website ?? null} isLink />
         </dl>
       </aside>
 
@@ -100,7 +100,7 @@ function ActivityTabs({ id }: { id: string }) {
             onClick={() => setTab(t)}
             className={`px-4 py-2 -mb-px border-b-2 ${tab === t ? "border-slate-900 font-semibold" : "border-transparent text-slate-500"}`}
           >
-            {t[0].toUpperCase() + t.slice(1)}
+{t[0]?.toUpperCase() + t.slice(1)}
           </button>
         ))}
       </div>

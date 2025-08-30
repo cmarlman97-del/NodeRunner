@@ -5,6 +5,7 @@
 
         // Contacts
         import {
+          type Contact,
           insertContactSchema,
           updateContactSchema,
           // Contact Types
@@ -68,7 +69,14 @@
           app.patch("/api/contacts/:id", async (req, res) => {
             try {
               const data = updateContactSchema.parse(req.body);
-              const updated = await storage.updateContact(req.params.id, data);
+              const cleanData: Partial<Contact> = (Object.entries(data) as [keyof Contact, unknown][])
+                .reduce((acc, [k, v]) => {
+                  if (v === undefined) return acc;          // omit missing keys (don't overwrite)
+                  const normalized = (v === "" ? null : v) as Contact[typeof k];
+                  acc[k] = normalized;
+                  return acc;
+                }, {} as Partial<Contact>);
+              const updated = await storage.updateContact(req.params.id, cleanData);
               if (!updated) return res.status(404).json({ message: "Contact not found" });
               res.json(updated);
             } catch (error) {
@@ -137,7 +145,7 @@
           app.delete("/api/contact-types/:id", async (req, res) => {
             try {
               const reassignToId = (req.query.reassignToId as string) || undefined;
-              const ok = await storage.deleteContactType(req.params.id, { reassignToId });
+              const ok = await storage.deleteContactType(req.params.id, reassignToId ? { reassignToId } : undefined);
               if (!ok) {
                 return res.status(400).json({
                   message: reassignToId

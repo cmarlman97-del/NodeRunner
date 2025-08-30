@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Manager - Professional Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    'inter': ['Inter', 'sans-serif'],
+                },
+                colors: {
+                    primary: {
+                        50: '#E3F2FD',
+                        500: '#2196F3',
+                        600: '#1976D2',
+                        700: '#1565C0'
+                    },
+                    success: {
+                        500: '#4CAF50',
+                        600: '#388E3C'
+                    },
+                    error: {
+                        500: '#F44336',
+                        600: '#D32F2F'
+                    }
+                },
+                boxShadow: {
+                    'material': '0 2px 4px rgba(0,0,0,0.1), 0 8px 16px rgba(0,0,0,0.1)',
+                    'material-lg': '0 4px 8px rgba(0,0,0,0.12), 0 16px 24px rgba(0,0,0,0.14)'
+                }
+            }
+        }
+    };
+    </script>
+</head>
+<body class="bg-gray-50 font-inter">
+    <!-- @COMPONENT: AppHeader -->
+    <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-address-book text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-semibold text-gray-900">Contact Manager</h1>
+                        <p class="text-sm text-gray-500">Manage your contacts efficiently</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <!-- @STATE: contactCount:number -->
+                    <div class="hidden sm:flex items-center space-x-2 text-sm text-gray-600">
+                        <i class="fas fa-users"></i>
+                        <span data-bind="contactCount">12</span>
+                        <span>contacts</span>
+                    </div>
+                    <button class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- @END_COMPONENT: AppHeader -->
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- @COMPONENT: AddContactForm -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-material p-6 sticky top-24">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-user-plus text-primary-600"></i>
+                        </div>
+                        <h2 class="text-lg font-semibold text-gray-900">Add New Contact</h2>
+                    </div>
+                    
+                    <form class="space-y-5" data-implementation="Handle form submission with validation">
+                        <!-- @STATE: formData:object, errors:object, isSubmitting:boolean -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Full Name <span class="text-error-500">*</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                data-bind="formData.name"
+                                placeholder="Enter full name"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                                data-mock="true"
+                            >
+                            <!-- @STATE: errors.name -->
+                            <p class="mt-1 text-sm text-error-500 hidden" data-bind="errors.name">Name is required</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Email Address <span class="text-error-500">*</span>
+                            </label>
+                            <input 
+                                type="email" 
+                                data-bind="formData.email"
+                                placeholder="Enter email address"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                                data-mock="true"
+                            >
+                            <!-- @STATE: errors.email -->
+                            <p class="mt-1 text-sm text-error-500 hidden" data-bind="errors.email">Valid email is required</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Phone Number
+                            </label>
+                            <input 
+                                type="tel" 
+                                data-bind="formData.phone"
+                                placeholder="Enter phone number (optional)"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                                data-mock="true"
+                            >
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Company
+                            </label>
+                            <input 
+                                type="text" 
+                                data-bind="formData.company"
+                                placeholder="Enter company (optional)"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                                data-mock="true"
+                            >
+                        </div>
+                        
+                        <div class="pt-4 space-y-3">
+                            <button 
+                                type="submit"
+                                data-event="click:handleSubmit"
+                                data-implementation="Validate form and submit to API"
+                                class="w-full bg-primary-600 text-white py-3 px-4 rounded-lg hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 font-medium transition-colors flex items-center justify-center space-x-2"
+                            >
+                                <i class="fas fa-plus"></i>
+                                <span>Add Contact</span>
+                            </button>
+                            <button 
+                                type="button"
+                                data-event="click:clearForm"
+                                class="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-200 font-medium transition-colors"
+                            >
+                                Clear Form
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- @END_COMPONENT: AddContactForm -->
+            
+            <!-- @COMPONENT: ContactDashboard -->
+            <div class="lg:col-span-2">
+                <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Your Contacts</h2>
+                        <p class="text-gray-600">Manage and organize your contact list</p>
+                    </div>
+                    
+                    <!-- Search and Filter Controls -->
+                    <div class="flex items-center space-x-3">
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            <input 
+                                type="text" 
+                                placeholder="Search contacts..."
+                                data-bind="searchQuery"
+                                data-event="input:handleSearch"
+                                class="pl-10 pr-4 py-2 w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                data-mock="true"
+                            >
+                        </div>
+                        <button class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg">
+                            <i class="fas fa-filter"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- @STATE: contacts:array, loading:boolean, error:string -->
+                <!-- @FUNCTIONALITY: Real-time updates when contacts are modified -->
+                
+                <!-- Contact List -->
+                <div class="space-y-4">
+                    <!-- @MAP: contacts.map(contact => ( -->
+                    <!-- Sample Contact Cards -->
+                    <div class="bg-white rounded-xl shadow-material p-6 hover:shadow-material-lg transition-shadow border border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">
+                                    <span data-bind="contact.initials" data-mock="true">JD</span>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900" data-bind="contact.name" data-mock="true">John Doe</h3>
+                                    <p class="text-gray-600" data-bind="contact.email" data-mock="true">john.doe@example.com</p>
+                                    <div class="flex items-center space-x-4 mt-1 text-sm text-gray-500">
+                                        <span data-bind="contact.phone" data-mock="true">+1 (555) 123-4567</span>
+                                        <span data-bind="contact.company" data-mock="true">Tech Corp</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button class="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="p-2 text-gray-400 hover:text-error-600 hover:bg-red-50 rounded-lg transition-colors" 
+                                        data-event="click:handleDelete"
+                                        data-implementation="Show confirmation modal then delete contact"
+                                        title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-material p-6 hover:shadow-material-lg transition-shadow border border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-gradient-to-br from-success-500 to-success-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">
+                                    <span data-bind="contact.initials" data-mock="true">SM</span>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900" data-bind="contact.name" data-mock="true">Sarah Miller</h3>
+                                    <p class="text-gray-600" data-bind="contact.email" data-mock="true">sarah.miller@designco.com</p>
+                                    <div class="flex items-center space-x-4 mt-1 text-sm text-gray-500">
+                                        <span data-bind="contact.phone" data-mock="true">+1 (555) 987-6543</span>
+                                        <span data-bind="contact.company" data-mock="true">Design Co</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button class="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="p-2 text-gray-400 hover:text-error-600 hover:bg-red-50 rounded-lg transition-colors" 
+                                        data-event="click:handleDelete"
+                                        data-implementation="Show confirmation modal then delete contact"
+                                        title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-material p-6 hover:shadow-material-lg transition-shadow border border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">
+                                    <span data-bind="contact.initials" data-mock="true">RJ</span>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900" data-bind="contact.name" data-mock="true">Robert Johnson</h3>
+                                    <p class="text-gray-600" data-bind="contact.email" data-mock="true">robert.johnson@startup.io</p>
+                                    <div class="flex items-center space-x-4 mt-1 text-sm text-gray-500">
+                                        <span data-bind="contact.phone" data-mock="true">+1 (555) 456-7890</span>
+                                        <span data-bind="contact.company" data-mock="true">StartUp Inc</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button class="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="p-2 text-gray-400 hover:text-error-600 hover:bg-red-50 rounded-lg transition-colors" 
+                                        data-event="click:handleDelete"
+                                        data-implementation="Show confirmation modal then delete contact"
+                                        title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- @END_MAP )) -->
+
+                    <!-- Empty State -->
+                    <div class="bg-white rounded-xl shadow-material p-12 text-center hidden" data-show-when="contacts.length === 0">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-users text-gray-400 text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">No contacts yet</h3>
+                        <p class="text-gray-600 mb-6">Add your first contact to get started with managing your network.</p>
+                        <button class="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors">
+                            <i class="fas fa-plus mr-2"></i>
+                            Add Your First Contact
+                        </button>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div class="bg-white rounded-xl shadow-material p-12 text-center hidden" data-show-when="loading">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+                        <p class="text-gray-600">Loading contacts...</p>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="mt-8 flex items-center justify-between">
+                    <div class="text-sm text-gray-600">
+                        <span data-bind="paginationInfo" data-mock="true">Showing 1-10 of 12 contacts</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button class="px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg disabled:opacity-50" disabled>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="px-3 py-2 bg-primary-600 text-white rounded-lg">1</button>
+                        <button class="px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg">2</button>
+                        <button class="px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- @END_COMPONENT: ContactDashboard -->
+        </div>
+    </div>
+
+    <!-- @COMPONENT: NotificationToast -->
+    <!-- Success/Error Toast Notifications -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2">
+        <!-- Success Toast -->
+        <div class="bg-success-600 text-white px-6 py-4 rounded-lg shadow-material-lg flex items-center space-x-3 hidden" data-toast="success">
+            <i class="fas fa-check-circle"></i>
+            <span data-bind="successMessage">Contact added successfully!</span>
+            <button class="ml-4 text-white hover:text-gray-200" data-event="click:dismissToast">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <!-- Error Toast -->
+        <div class="bg-error-600 text-white px-6 py-4 rounded-lg shadow-material-lg flex items-center space-x-3 hidden" data-toast="error">
+            <i class="fas fa-exclamation-circle"></i>
+            <span data-bind="errorMessage">Failed to add contact. Please try again.</span>
+            <button class="ml-4 text-white hover:text-gray-200" data-event="click:dismissToast">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: NotificationToast -->
+
+    <!-- @COMPONENT: DeleteConfirmationModal -->
+    <!-- Delete Confirmation Modal -->
+    <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden" data-modal="delete-confirmation">
+        <div class="bg-white rounded-xl shadow-material-lg p-6 max-w-md w-full mx-4">
+            <div class="flex items-center space-x-3 mb-4">
+                <div class="w-10 h-10 bg-error-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-trash text-error-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900">Delete Contact</h3>
+            </div>
+            <p class="text-gray-600 mb-6">Are you sure you want to delete <span class="font-semibold" data-bind="selectedContact.name" data-mock="true">John Doe</span>? This action cannot be undone.</p>
+            <div class="flex space-x-3 justify-end">
+                <button class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors" data-event="click:closeModal">
+                    Cancel
+                </button>
+                <button class="px-4 py-2 bg-error-600 text-white hover:bg-error-700 rounded-lg transition-colors" 
+                        data-event="click:confirmDelete"
+                        data-implementation="Delete contact via API and update UI">
+                    Delete Contact
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: DeleteConfirmationModal -->
+
+    <script>
+        // TODO: Implement React components and state management
+        // TODO: Implement API calls for CRUD operations
+        // TODO: Implement real-time updates
+        // TODO: Implement form validation
+        // TODO: Implement search and filter functionality
+        
+        (function() {
+            // Demo functionality for mockup preview
+            console.log('Contact Manager Dashboard Mockup Loaded');
+            
+            // TODO: Replace with actual React state management
+            const mockState = {
+                contacts: [
+                    { id: 1, name: 'John Doe', email: 'john.doe@example.com', phone: '+1 (555) 123-4567', company: 'Tech Corp' },
+                    { id: 2, name: 'Sarah Miller', email: 'sarah.miller@designco.com', phone: '+1 (555) 987-6543', company: 'Design Co' },
+                    { id: 3, name: 'Robert Johnson', email: 'robert.johnson@startup.io', phone: '+1 (555) 456-7890', company: 'StartUp Inc' }
+                ],
+                loading: false,
+                formData: { name: '', email: '', phone: '', company: '' },
+                errors: {}
+            };
+            
+            // TODO: Implement proper event handlers
+            // Form submission, validation, API calls, etc.
+        })();
+    </script>
+</body>
+</html>

@@ -141,7 +141,17 @@ export class MemStorage implements IStorage {
 
   async createContact(insertContact: InsertContact): Promise<Contact> {
     const id = randomUUID();
-    const contact: Contact = { ...insertContact, id };
+    const contact: Contact = {
+      id,
+      name: insertContact.name,
+      email: insertContact.email,
+      contactType: insertContact.contactType ?? null,
+      state: insertContact.state ?? null,
+      phone: insertContact.phone ?? null,
+      company: insertContact.company ?? null,
+      city: insertContact.city ?? null,
+      website: insertContact.website ?? null,
+    };
     this.contacts.set(id, contact);
     return contact;
   }
@@ -205,7 +215,7 @@ export class MemStorage implements IStorage {
       id,
       label,
       isActive: data.isActive ?? true,
-      sortOrder: data.sortOrder,
+      sortOrder: data.sortOrder ?? 0,
     };
     this.contactTypes.set(id, item);
     return item;
@@ -218,6 +228,8 @@ export class MemStorage implements IStorage {
       ...existing,
       ...data,
       label: data.label !== undefined ? data.label.trim() : existing.label,
+      isActive: data.isActive ?? existing.isActive,
+      sortOrder: data.sortOrder ?? existing.sortOrder,
     };
     this.contactTypes.set(id, updated);
     return updated;
