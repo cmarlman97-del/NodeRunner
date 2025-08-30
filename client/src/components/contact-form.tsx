@@ -45,7 +45,7 @@ export default function ContactForm({ onCreated, onCancel }: ContactFormProps) {
   useEffect(() => {
     const current = form.getValues("contactType");
     if (!current && types.length > 0) {
-      form.setValue("contactType", types[0].label, { shouldValidate: true });
+      form.setValue("contactType", types?.[0]?.label ?? "Broker", { shouldValidate: true });
     }
   }, [types, form]);
 

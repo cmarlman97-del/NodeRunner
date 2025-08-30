@@ -69,11 +69,16 @@
           app.patch("/api/contacts/:id", async (req, res) => {
             try {
               const data = updateContactSchema.parse(req.body);
+              const NULLABLE_KEYS: (keyof Contact)[] = ["contactType", "state", "phone", "company", "city", "website"];
+
               const cleanData: Partial<Contact> = (Object.entries(data) as [keyof Contact, unknown][])
                 .reduce((acc, [k, v]) => {
-                  if (v === undefined) return acc;          // omit missing keys (don't overwrite)
-                  const normalized = (v === "" ? null : v) as Contact[typeof k];
-                  acc[k] = normalized;
+                  if (v === undefined) return acc; // omit missing keys (don't overwrite)
+                  if (v === "" && NULLABLE_KEYS.includes(k)) {
+                    (acc as any)[k] = null;
+                    return acc;
+                  }
+                  (acc as any)[k] = v as any;
                   return acc;
                 }, {} as Partial<Contact>);
               const updated = await storage.updateContact(req.params.id, cleanData);
