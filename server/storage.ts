@@ -11,11 +11,14 @@ import {
 import { randomUUID } from "crypto";
 
 // --------- Local minimal types for Activities (in-memory) ---------
-export type Note = {
+export interface Note {
   id: string;
   contactId: string;
+  title?: string | null;
   body: string;
+  occurredAt: Date | null;
   createdAt: string; // ISO
+  updatedAt: string; // ISO
 };
 
 export type Task = {
@@ -74,7 +77,16 @@ export interface IStorage {
   deleteContactType(id: string, opts?: { reassignToId?: string }): Promise<boolean>;
   countContactsByTypeLabel(label: string): Promise<number>;
 
-  // Activities (read-only lists for the Contact Detail page)
+  // Activities
+  createNote(
+    contactId: string,
+    data: {
+      title?: string | null;
+      body: string;
+      occurredAt?: string | Date | null;
+      createTask?: boolean;
+    }
+  ): Promise<Note>;
   listNotes(contactId: string, opts: PageOpts): Promise<Page<Note>>;
   listTasks(contactId: string, opts: PageOpts): Promise<Page<Task>>;
   listCalls(contactId: string, opts: PageOpts): Promise<Page<Call>>;
@@ -141,6 +153,7 @@ export class MemStorage implements IStorage {
 
   async createContact(insertContact: InsertContact): Promise<Contact> {
     const id = randomUUID();
+    const now = new Date();
     const contact: Contact = {
       id,
       name: insertContact.name,
@@ -148,10 +161,19 @@ export class MemStorage implements IStorage {
       contactType: insertContact.contactType ?? null,
       state: insertContact.state ?? null,
       phone: insertContact.phone ?? null,
+      cellPhone: insertContact.cellPhone ?? null,
+      title: insertContact.title ?? null,
       company: insertContact.company ?? null,
       city: insertContact.city ?? null,
       website: insertContact.website ?? null,
+      // New fields
+      owner: insertContact.owner ?? null,
+      createdAt: now,
+      propertyTypes: insertContact.propertyTypes ?? null,
+      lastActivityDate: insertContact.lastActivityDate ?? null,
+      nextActivityDate: insertContact.nextActivityDate ?? null,
     };
+    
     this.contacts.set(id, contact);
     return contact;
   }
@@ -163,7 +185,19 @@ export class MemStorage implements IStorage {
   async updateContact(id: string, data: Partial<Contact>): Promise<Contact | undefined> {
     const existing = this.contacts.get(id);
     if (!existing) return undefined;
-    const updated: Contact = { ...existing, ...data };
+    
+    // Create a new object with only the fields that were provided in the update
+    const updated: Contact = { ...existing };
+    
+    // Only update fields that exist in the data object
+    for (const [key, value] of Object.entries(data)) {
+      if (value !== undefined) {
+        // Convert empty strings to null for nullable fields
+        updated[key as keyof Contact] = value === '' ? null : value as any;
+      }
+    }
+    
+    // Update the contact in storage
     this.contacts.set(id, updated);
     return updated;
   }
@@ -179,8 +213,10 @@ export class MemStorage implements IStorage {
       includes((contact as any).firstName) ||
       includes((contact as any).lastName) ||
       includes(contact.email) ||
+      includes((contact as any).title) ||
       includes((contact as any).company) ||
       includes((contact as any).phone) ||
+      includes((contact as any).cellPhone) ||
       includes((contact as any).contactType) ||
       includes((contact as any).city) ||
       includes((contact as any).state)
@@ -272,10 +308,53 @@ export class MemStorage implements IStorage {
 
   // ==== Activities (read-only list endpoints for the Contact Detail page) ====
 
+  async createNote(
+    contactId: string, 
+    data: { 
+      title?: string | null; 
+      body: string; 
+      occurredAt?: string | Date | null;
+      createTask?: boolean;
+    }
+  ): Promise<Note> {
+    const id = randomUUID();
+    const now = isoNow();
+    const occurredAt = data.occurredAt ? new Date(data.occurredAt) : new Date();
+    
+    // Create the note
+    const note: Note = {
+      id,
+      contactId,
+      title: data.title || null,
+      body: data.body,
+      occurredAt,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.notes.set(id, note);
+    
+    // Create a task if requested
+    if (data.createTask) {
+      const taskId = randomUUID();
+      const task: Task = {
+        id: taskId,
+        contactId,
+        title: data.title || 'Follow up',
+        status: 'open',
+        dueAt: occurredAt.toISOString(),
+        createdAt: now,
+      };
+      this.tasks.set(taskId, task);
+      console.log(`[DEBUG] Created task from note:`, task);
+    }
+    
+    return note;
+  }
+
   async listNotes(contactId: string, opts: PageOpts): Promise<Page<Note>> {
     const items = Array.from(this.notes.values())
       .filter((n) => n.contactId === contactId)
-      .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+      .sort((a, b) => (a.occurredAt || a.createdAt) < (b.occurredAt || b.createdAt) ? 1 : -1);
     return paginate(items, opts);
   }
 

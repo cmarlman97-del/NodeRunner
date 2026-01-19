@@ -1,6 +1,4 @@
 ---
-trigger: always_on
+trigger: manual
 ---
-
-
 

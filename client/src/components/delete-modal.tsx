@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+// TODO: Consider migrating to use the shared Modal component in a future pass
 import { Trash2 } from "lucide-react";
 
 interface DeleteModalProps {

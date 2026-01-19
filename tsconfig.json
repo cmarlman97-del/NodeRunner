@@ -24,7 +24,11 @@
     "types": ["node", "vite/client"],
     "paths": {
       "@/*": ["./client/src/*"],
-      "@shared/*": ["./shared/*"]
+      "@shared/*": ["./shared/*"],
+      "@/components/*": ["./client/src/components/*"],
+      "@/lib/*": ["./client/src/lib/*"],
+      "@/hooks/*": ["./client/src/hooks/*"],
+      "@/styles/*": ["./client/src/styles/*"]
     }
   }
 }

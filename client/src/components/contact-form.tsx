@@ -8,7 +8,10 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserPlus, Plus, X } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { US_STATES } from "@/constants/us-states";
+import { formatPhoneNumber, stripPhoneFormatting } from "@/lib/phone-utils";
+// No lucide-react imports needed
 
 type ContactFormProps = {
   onCreated?: () => void; // called on successful create
@@ -18,6 +21,10 @@ type ContactFormProps = {
 export default function ContactForm({ onCreated, onCancel }: ContactFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // State for formatted phone displays
+  const [cellPhoneDisplay, setCellPhoneDisplay] = useState("");
+  const [phoneDisplay, setPhoneDisplay] = useState("");
 
   // Load managed contact types
   const {
@@ -34,6 +41,7 @@ export default function ContactForm({ onCreated, onCancel }: ContactFormProps) {
       name: "",
       email: "",
       phone: "",
+      cellPhone: "",
       company: "",
       contactType: "", // we'll set this to the first available type when types load
       city: "",
@@ -64,11 +72,15 @@ export default function ContactForm({ onCreated, onCancel }: ContactFormProps) {
         name: "",
         email: "",
         phone: "",
+        cellPhone: "",
         company: "",
         contactType: types[0]?.label ?? "",
         city: "",
         state: "",
       });
+      // Reset phone displays
+      setCellPhoneDisplay("");
+      setPhoneDisplay("");
       toast({ title: "Success", description: "Contact added successfully!" });
     },
     onError: (error: any) => {
@@ -80,6 +92,32 @@ export default function ContactForm({ onCreated, onCancel }: ContactFormProps) {
     },
   });
 
+  // Handle cell phone number formatting
+  const handleCellPhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target.value;
+    const formatted = formatPhoneNumber(input);
+    const stripped = stripPhoneFormatting(input);
+    
+    // Update display value with formatting
+    setCellPhoneDisplay(formatted);
+    
+    // Update form value with stripped digits for storage
+    form.setValue("cellPhone", stripped);
+  };
+
+  // Handle work phone number formatting
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target.value;
+    const formatted = formatPhoneNumber(input);
+    const stripped = stripPhoneFormatting(input);
+    
+    // Update display value with formatting
+    setPhoneDisplay(formatted);
+    
+    // Update form value with stripped digits for storage
+    form.setValue("phone", stripped);
+  };
+
   const onSubmit = (data: InsertContact) => {
     if (!data.contactType) {
       toast({ title: "Contact type required", description: "Please pick a type." });
@@ -90,25 +128,6 @@ export default function ContactForm({ onCreated, onCancel }: ContactFormProps) {
 
   return (
     <div className="bg-white rounded-xl shadow-material p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
-            <UserPlus className="text-primary-600 h-4 w-4" />
-          </div>
-          <h2 className="text-lg font-semibold text-gray-900">Add New Contact</h2>
-        </div>
-        {onCancel && (
-          <button
-            type="button"
-            onClick={onCancel}
-            className="p-2 rounded hover:bg-gray-100"
-            aria-label="Close"
-            title="Close"
-          >
-            <X className="h-5 w-5 text-gray-600" />
-          </button>
-        )}
-      </div>
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
         {/* Name */}
@@ -148,15 +167,31 @@ export default function ContactForm({ onCreated, onCancel }: ContactFormProps) {
           )}
         </div>
 
-        {/* Phone */}
+        {/* Cell Phone */}
         <div>
           <Label className="block text-sm font-medium text-gray-700 mb-2">
-            Phone Number
+            Cell Phone
           </Label>
           <Input
             type="tel"
-            {...form.register("phone")}
-            placeholder="Enter phone number (optional)"
+            value={cellPhoneDisplay}
+            onChange={handleCellPhoneChange}
+            placeholder="Enter cell phone (optional)"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+            data-testid="input-contact-cellphone"
+          />
+        </div>
+
+        {/* Work Phone */}
+        <div>
+          <Label className="block text-sm font-medium text-gray-700 mb-2">
+            Work Phone
+          </Label>
+          <Input
+            type="tel"
+            value={phoneDisplay}
+            onChange={handlePhoneChange}
+            placeholder="Enter work phone (optional)"
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
             data-testid="input-contact-phone"
           />
@@ -216,12 +251,24 @@ export default function ContactForm({ onCreated, onCancel }: ContactFormProps) {
             <Label className="block text-sm font-medium text-gray-700 mb-2">
               State
             </Label>
-            <Input
-              {...form.register("state")}
-              placeholder="State (optional)"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-              data-testid="input-contact-state"
-            />
+            <Select
+              value={form.watch("state") || ""}
+              onValueChange={(value) => form.setValue("state", value)}
+            >
+              <SelectTrigger 
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                data-testid="select-contact-state"
+              >
+                <SelectValue placeholder="Select state (optional)" />
+              </SelectTrigger>
+              <SelectContent>
+                {US_STATES.map((state) => (
+                  <SelectItem key={state.code} value={state.code}>
+                    {state.name} ({state.code})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -229,12 +276,12 @@ export default function ContactForm({ onCreated, onCancel }: ContactFormProps) {
         <div className="pt-4 flex gap-3">
           <Button
             type="submit"
+            variant="cta"
             disabled={createContactMutation.isPending || typesLoading}
-            className="flex-1 bg-primary-600 text-white py-3 px-4 rounded-lg hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 font-medium transition-colors flex items-center justify-center gap-2"
+            className="flex-1 flex items-center justify-center"
             data-testid="button-add-contact"
           >
-            <Plus className="h-4 w-4" />
-            <span>{createContactMutation.isPending ? "Adding..." : "Add Contact"}</span>
+            {createContactMutation.isPending ? "Adding..." : "Add Contact"}
           </Button>
 
           <Button
